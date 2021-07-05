@@ -15,9 +15,6 @@ let dadosPaciente = async (pdfFile) =>
 			.forEach((y) => 
 			{
 				saida.push(rows[y]);
-				//console.log(y);
-				//console.log((rows[y] || []).join(" "))
-				//texto += (rows[y] || []).join(" ") + "\n";
 			});
 			return saida;
 		}
@@ -48,7 +45,6 @@ let dadosPaciente = async (pdfFile) =>
 				dados.dataNasc = dataNasc;
 			}
 			
-			//console.log(dados);
 			return dados;
 		}
 		
@@ -90,18 +86,14 @@ dir.forEach(file =>
 
 Promise.all(promises).then(valores =>
 {
-	let saida = "ID;DATA_NASC;NOME\n";
-	//console.log(valores);
+	let saida = "ID;NOME;DATA_NASC\n";
 	valores.forEach(linha =>
 	{
-		saida += linha.id + ";" + linha.dataNasc + ";" + linha.nome + "\n";
+		saida += linha.id + ";" + linha.nome + ";" + linha.dataNasc + "\n";
 	});
 	fs.writeFileSync("dados.txt",saida);
 	console.log('Dados salvos em "dados.txt"!');
 });
-
-//dadosPaciente("2839.pdf").then(dados => console.log(dados));
-//dadosPaciente("2848.pdf");
 
 /**
  * Campos necessários:
