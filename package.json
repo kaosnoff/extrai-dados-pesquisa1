@@ -1,0 +1,18 @@
+{
+  "name": "br.com.vitordutra.bruno",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+		"start": "node index.js",
+    "test": "nodemon"
+  },
+  "author": "Vitor Dutra",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.9"
+  },
+  "dependencies": {
+    "pdfreader": "^1.2.10"
+  }
+}
