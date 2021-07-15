@@ -91,7 +91,7 @@ Promise.all(promises).then(valores =>
 	{
 		saida += linha.id + ";" + linha.nome + ";" + linha.dataNasc + "\n";
 	});
-	fs.writeFileSync("dados.txt",saida);
+	fs.writeFileSync(path.join("saidas","dados.txt"),saida);
 	console.log('Dados salvos em "dados.txt"!');
 });
 

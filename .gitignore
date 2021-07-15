@@ -1,4 +1,8 @@
 node_modules
 /pdf/*
-dados.txt
+!/pdf/empty
+/saidas/*
+!/saidas/empty
+/single/*
+!/single/empty
 *.zip
