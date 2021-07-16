@@ -2,6 +2,16 @@ const fs = require('fs');
 const pdfreader = require("pdfreader");
 const path = require('path');
 
+// Ano
+const ano = '2018';
+
+// Arquivo de entrada
+const arqEntrada = path.join('single',`Relatório ${ano}.pdf`);
+
+// Arquivo de saida
+const arqSaida = path.join('saidas',`relatorio${ano}.csv`);
+
+// Transforma o arquivo em um objeto
 const PDF2Object = async (fileName) =>
 {
 	return new Promise((resolve, reject) =>
@@ -35,6 +45,8 @@ const PDF2Object = async (fileName) =>
 		);
 	})
 }
+
+// Transforma o arquivo em um array de linhas
 const PDF2Array = async (fileName) =>
 {
 	return new Promise(async (resolve, reject) =>
@@ -46,6 +58,8 @@ const PDF2Array = async (fileName) =>
 			pdfArray[p] = [];
 			let page = pdfObj[p];
 			let keys = Object.keys(page);
+			
+			// Ordena as linhas
 			keys.sort((a,b) =>
 			{
 				a = Number(a);
@@ -66,10 +80,14 @@ const PDF2Array = async (fileName) =>
 	})
 }
 
-PDF2Array(path.join('single','Relatorio2014.pdf')).then(pdfArray =>
+// Processa o arquivo
+PDF2Array(arqEntrada).then(pdfArray =>
 {
+	// Monta o cabeçalho
 	let saida = "Data cadastro; Nome; Data nascimento\n";
 	let rows = [];
+	
+	// Ignora as linhas de cabeçalho e rodapé
 	pdfArray.forEach((page,p) =>
 	{
 		for (let i = 4; i < page.length; i++)
@@ -79,25 +97,16 @@ PDF2Array(path.join('single','Relatorio2014.pdf')).then(pdfArray =>
 			{
 				rows.push(row);
 			}
-			//saida += `${row[1]}; ${row[2]}; ${row[0]}\n`;
 		}
 	});
 	
+	// Monta os dados linha a linha
 	rows.forEach((row,i) =>
 	{
-		if (i % 2 !== 0) return;
+		// Verifica se o primeiro dado da linha é uma data
+		if ((row[0].match(/\//g) || []).length !== 2) return;
 		saida += `${row[1]}; ${row[2]}; ${row[0]}\n`;
 	})
-	//console.log(JSON.stringify(pdfArray,null,2));
-	/*
-	for (let p in obj)
-	{
-		let page = obj[p];
-		console.log(i, row);
-	}
-	// */
-	//console.log(Object.keys(rows));
-	//console.log(rows);
-	//fs.writeFileSync("teste.txt",JSON.stringify(rows,null,2));
-	fs.writeFileSync(path.join("saidas","relatorio2014.csv"),saida,{encoding: 'latin1'});
+	
+	fs.writeFileSync(arqSaida,saida,{encoding: 'latin1'});
 });
