@@ -1,101 +1,115 @@
 const fs = require('fs');
 const pdfreader = require("pdfreader");
+const path = require('path');
 
-let dadosPaciente = async (pdfFile) =>
+// Ano
+const ano = '2018';
+
+// Arquivo de entrada
+const arqEntrada = path.join('single',`Relatório ${ano}.pdf`);
+
+// Arquivo de saida
+const arqSaida = path.join('saidas',`relatorio${ano}.csv`);
+
+// Transforma o arquivo em um objeto
+const PDF2Object = async (fileName) =>
 {
 	return new Promise((resolve, reject) =>
 	{
-		var rows = {};
-		
-		const getRows = () =>
-		{
-			let saida = [];
-			Object.keys(rows)
-			.sort((y1,y2) => parseFloat(y1) - parseFloat(y2))
-			.forEach((y) => 
-			{
-				saida.push(rows[y]);
-			});
-			return saida;
-		}
-		
-		const pegaDados = (rows) =>
-		{
-			if (!rows) return;
-			let linhaNome = rows[4];
-			linhaDados = rows[5];
-			let dados = {
-				nome: '',
-				id: '',
-				dataNasc: '',
-				file: ''
-			}
-			
-			if (linhaNome && linhaNome instanceof Array)
-			{
-				linhaNome.shift();
-				linhaNome = linhaNome.join(' ');
-				dados.nome = linhaNome;
-			}
-			if (linhaDados && linhaDados instanceof Array)
-			{
-				let ID = linhaDados[0];
-				let dataNasc = linhaDados[1];
-				dados.id = ID;
-				dados.dataNasc = dataNasc;
-			}
-			
-			return dados;
-		}
-		
-		return new pdfreader.PdfReader().parseFileItems(
-			"pdf/" + pdfFile,
+		let rows = [];
+		console.log('#### Início do processamento ###');
+		let page = -1;
+		return (new pdfreader.PdfReader()).parseFileItems(
+			fileName,
 			(err,item) =>
 			{
-				if (!item || item.page)
+				if (!item)
 				{
-					let dados = pegaDados(getRows());
-					// end of file, or page
-					if (dados.id)
-					{
-						dados.file = pdfFile
-						resolve(dados);
-					}
-					rows = {}; //Clear rows for next page
-					if (item)
-					{
-						//console.log('Page:',item.page);
-					}
+					//console.log(rows);
+					console.log('#### FINAL DO ARQUIVO ###');
+					resolve(rows);
+					return;
 				}
-				else if (item.text)
+				else if (item.page)
 				{
-					// accumulate text items into rows object, per line
-					(rows[item.y] = rows[item.y] || []).push(item.text);
+					console.log('Processada página '+item.page);
+					rows[++page] = [];
+				}
+				if (item.text)
+				{
+					//saida.push(item.text);
+					if (!rows[page][item.y]) rows[page][item.y] = [];
+					rows[page][item.y].push(item.text);
 				}
 			}
-		)
-	});
+		);
+	})
 }
 
-let dir = fs.readdirSync('pdf',{encoding:'utf-8'});
-let promises = [];
-dir.forEach(file =>
+// Transforma o arquivo em um array de linhas
+const PDF2Array = async (fileName) =>
 {
-	promises.push(dadosPaciente(file));
-});
-
-Promise.all(promises).then(valores =>
-{
-	let saida = "ID;NOME;DATA_NASC\n";
-	valores.forEach(linha =>
+	return new Promise(async (resolve, reject) =>
 	{
-		saida += linha.id + ";" + linha.nome + ";" + linha.dataNasc + "\n";
-	});
-	fs.writeFileSync(path.join("saidas","dados.txt"),saida);
-	console.log('Dados salvos em "dados.txt"!');
-});
+		let pdfObj = await PDF2Object(fileName);
+		let pdfArray = [];
+		for (let p in pdfObj)
+		{
+			pdfArray[p] = [];
+			let page = pdfObj[p];
+			let keys = Object.keys(page);
+			
+			// Ordena as linhas
+			keys.sort((a,b) =>
+			{
+				a = Number(a);
+				b = Number(b);
+				if (a > b) return 1;
+				if (a < b) return -1;
+				return 0;
+			});
+			
+			// Joga as linhas para a saída
+			for (let i of keys)
+			{
+				let row = page[i];
+				pdfArray[p].push(row);
+			}
+			// */
+		}
+		resolve(pdfArray);
+	})
+}
 
-/**
- * Campos necessários:
-Nome, ID do paciente e Data de Nascimento
- */
+// Processa o arquivo
+PDF2Array(arqEntrada).then(pdfArray =>
+{
+	// Monta o cabeçalho
+	let saida = "Data cadastro; Nome; Data nascimento\n";
+	let rows = [];
+	
+	// Ignora as linhas de cabeçalho e rodapé
+	pdfArray.forEach((page,p) =>
+	{
+		for (let i = 4; i < page.length; i++)
+		{
+			let row = page[i];
+			if (row[0].indexOf('Página ') !== 0)
+			{
+				rows.push(row);
+			}
+		}
+	});
+	
+	// Monta os dados linha a linha
+	rows.forEach((row,i) =>
+	{
+		// Verifica se o primeiro dado da linha é uma data
+		if ((row[0].match(/\//g) || []).length !== 2) return;
+		
+		// exporta a saída no formato desejado
+		saida += `${row[1]}; ${row[2]}; ${row[0]}\n`;
+	})
+	
+	fs.writeFileSync(arqSaida,saida,{encoding: 'latin1'});
+});
