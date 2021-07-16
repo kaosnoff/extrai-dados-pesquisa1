@@ -69,6 +69,7 @@ const PDF2Array = async (fileName) =>
 				return 0;
 			});
 			
+			// Joga as linhas para a saída
 			for (let i of keys)
 			{
 				let row = page[i];
@@ -105,6 +106,8 @@ PDF2Array(arqEntrada).then(pdfArray =>
 	{
 		// Verifica se o primeiro dado da linha é uma data
 		if ((row[0].match(/\//g) || []).length !== 2) return;
+		
+		// exporta a saída no formato desejado
 		saida += `${row[1]}; ${row[2]}; ${row[0]}\n`;
 	})
 	
