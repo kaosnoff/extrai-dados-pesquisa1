@@ -1,5 +1,6 @@
 const fs = require('fs');
 const pdfreader = require("pdfreader");
+const path = require('path');
 
 let dadosPaciente = async (pdfFile) =>
 {
@@ -23,11 +24,13 @@ let dadosPaciente = async (pdfFile) =>
 		{
 			if (!rows) return;
 			let linhaNome = rows[4];
-			linhaDados = rows[5];
+			let linhaDados = rows[5];
+			let linhaDados2 = rows[7];
 			let dados = {
 				nome: '',
 				id: '',
 				dataNasc: '',
+				dataExame: '',
 				file: ''
 			}
 			
@@ -43,6 +46,10 @@ let dadosPaciente = async (pdfFile) =>
 				let dataNasc = linhaDados[1];
 				dados.id = ID;
 				dados.dataNasc = dataNasc;
+			}
+			if (linhaDados2 && linhaDados2 instanceof Array)
+			{
+				dados.dataExame = linhaDados2[1];
 			}
 			
 			return dados;
@@ -81,15 +88,17 @@ let dir = fs.readdirSync('pdf',{encoding:'utf-8'});
 let promises = [];
 dir.forEach(file =>
 {
+	if (file === 'empty') return;
+	
 	promises.push(dadosPaciente(file));
 });
 
 Promise.all(promises).then(valores =>
 {
-	let saida = "ID;NOME;DATA_NASC\n";
+	let saida = "ID;NOME;DATA_NASC;DATA_EXAME\n";
 	valores.forEach(linha =>
 	{
-		saida += linha.id + ";" + linha.nome + ";" + linha.dataNasc + "\n";
+		saida += linha.id + ";" + linha.nome + ";" + linha.dataNasc + ";" + linha.dataExame + "\n";
 	});
 	fs.writeFileSync(path.join("saidas","dados.txt"),saida);
 	console.log('Dados salvos em "dados.txt"!');
