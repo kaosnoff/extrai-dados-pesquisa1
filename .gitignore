@@ -6,3 +6,5 @@ node_modules
 /single/*
 !/single/empty
 *.zip
+/dados/*
+!/dados/empty
