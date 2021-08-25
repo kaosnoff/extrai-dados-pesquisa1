@@ -8,3 +8,14 @@ node_modules
 *.zip
 /dados/*
 !/dados/empty
+/entradas/*
+!/entradas/empty
+!/entradas/densitometria
+/entradas/densitometria/*
+!/entradas/densitometria/empty
+!/entradas/hemograma
+/entradas/hemograma/*
+!/entradas/hemograma/empty
+!/entradas/hormonios
+/entradas/hormonios/*
+!/entradas/hormonios/empty
