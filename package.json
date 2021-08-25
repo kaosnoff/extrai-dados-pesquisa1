@@ -13,6 +13,7 @@
     "nodemon": "^2.0.9"
   },
   "dependencies": {
+    "minimist": "^1.2.5",
     "pdfreader": "^1.2.10",
     "string-similarity": "^4.0.4"
   }
