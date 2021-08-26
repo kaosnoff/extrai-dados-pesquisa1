@@ -4,7 +4,6 @@ const fs = require('fs');
 const Helpers = require('./src/Helpers');
 
 const extrator = new ExtraiDadosPdf();
-
 /*
 let dir = fs.readdirSync(path.join('entradas','teste'));
 dir.forEach(filename =>
@@ -56,117 +55,125 @@ const extraiPastaHormonios = function(subdiretorio)
 		{
 			for (let j in pagina)
 			{
-				let bloco = pagina[j];
+				let bloco = pagina[j].join('');
 				//	TSH (HORMÔNIO ESTIMULANTE DA TIREOIDE)
-				if (bloco[0].indexOf('TSH') === 0)
+				if (bloco.indexOf('TSH') === 0)
 				{
-					let str = bloco[2];
-					str = str.split(' ');
+					let reg = /:([^μUI]+)/;
+					let str = reg.exec(bloco);
 					str = str[1].trim();
 					dados['TSH'] = str;
 				}
 				//	T3 (TRIIODOTIRONINA)
-				if (bloco[0].indexOf('T3 ') === 0)
+				if (bloco.indexOf('T3 ') === 0)
 				{
-					let str = bloco[0];
-					str = str.split(' ');
-					str = str[2].trim();
+					let reg = /:([^ng\/]+)/;
+					let str = reg.exec(bloco);
+					str = str[1].trim();
 					dados['T3'] = str;
 				}
 				//	T3L (TRIIODOTIRONINA LIVRE)
-				if (bloco[0].indexOf('T3L ') === 0)
+				if (bloco.indexOf('T3L ') === 0)
 				{
-					let str = bloco[2];
-					str = str.split(' ');
+					let reg = /:([^pg\/]+)/;
+					let str = reg.exec(bloco);
 					str = str[1].trim();
 					dados['T3L'] = str;
 				}
-				//	TODO: T4 (TIROXINA)
-				//	T4L (TIROXINA LIVRE)
-				if (bloco[0].indexOf('T4L ') === 0)
+				//	T4 (TIROXINA)
+				if (bloco.indexOf('T4 ') === 0)
 				{
-					let str = bloco[2];
-					str = str.split(' ');
+					let reg = /:([^ng\/dL]+)/;
+					let str = reg.exec(bloco);
+					str = str[1].trim();
+					dados['T4'] = str;
+				}
+				//	T4L (TIROXINA LIVRE)
+				if (bloco.indexOf('T4L ') === 0)
+				{
+					let reg = /:([^ng\/dL]+)/;
+					let str = reg.exec(bloco);
 					str = str[1].trim();
 					dados['T4L'] = str;
 				}
 				//	CÁLCIO SÉRICO
-				if (bloco[0].indexOf('CÁLCIO SÉRICO.') === 0)
+				if (bloco.indexOf('CÁLCIO SÉRICO.') === 0)
 				{
-					let str = bloco[0];
-					str = str.split(/[:(mg)]+/);
+					let reg = /:([^mg\/dL]+)/;
+					let str = reg.exec(bloco);
 					str = str[1].trim();
 					dados['calcio_serico'] = str;
 				}
 				//	VITAMINA D (25 HIDROXI-VIT D)
-				if (bloco[0].indexOf('VITAMINA D ') === 0)
+				if (bloco.indexOf('VITAMINA D ') === 0)
 				{
-					let str = bloco[2];
-					str = str.split(/[\s]+/);
+					let reg = /:([^ng\/mL]+)/;
+					let str = reg.exec(bloco);
 					str = str[1].trim();
 					dados['vitamina_d'] = str;
 				}
 				//	CÁLCIO IONIZADO
-				if (bloco[0].indexOf('CÁLCIO IONIZADO.') === 0)
+				if (bloco.indexOf('CÁLCIO IONIZADO.') === 0)
 				{
-					let str = bloco[0];
-					str = str.split(/[:]+/);
+					let reg = /:([^mmol\/L]+)/;
+					let str = reg.exec(bloco);
 					str = str[1].trim();
 					dados['calcio_ionizado'] = str;
 				}
 				//	FÓSFORO
-				if (bloco[0].indexOf('FÓSFORO') === 0)
+				if (bloco.indexOf('FÓSFORO') === 0)
 				{
-					let str = bloco[0];
-					str = str.split(/[:(mg)]+/);
+					let reg = /:([^mg\/dL]+)/;
+					let str = reg.exec(bloco);
 					str = str[1].trim();
 					dados['fosforo'] = str;
 				}
 				//	PARATORMÔNIO MOLÉCULA INTACTA (PTH)
-				if (bloco[0].indexOf('PARATORMÔNIO MOLÉCULA INTACTA') === 0)
+				if (bloco.indexOf('PARATORMÔNIO MOLÉCULA INTACTA') === 0)
 				{
-					let str = bloco[2];
-					str = str.split(/[:(pg)]+/);
+					let reg = /:([^pg\/mL]+)/;
+					let str = reg.exec(bloco);
 					str = str[1].trim();
 					dados['paratormonio'] = str;
 				}
 				//	FOSFATASE ALCALINA
-				if (bloco[0].indexOf('FOSFATASE ALCALINA') === 0 && bloco[0].indexOf('FOSFATASE ALCALINA ') !== 0)
+				if (bloco.indexOf('FOSFATASE ALCALINA') === 0)
 				{
-					let str = bloco.length > 2 ? bloco[2] : bloco[0];
-					str = str.split(/[:(U)]+/);
-					str = bloco.length > 2 ? str[0].trim() : str[1].trim();
+					if (bloco.indexOf('FOSFATASE ALCALINA FRAÇÃO ÓSSEA') === 0) return;
+					let reg = /:([^U\/L]+)/;
+					let str = reg.exec(bloco);
+					str = str[1].trim();
 					dados['fosfatase'] = str;
 				}
 				//	ALT - ALANINA AMINOTRANSFERASE (TGP)
-				if (bloco[0].indexOf('ALT - ALANINA') === 0)
+				if (bloco.indexOf('ALT - ALANINA') === 0)
 				{
-					let str = bloco[0];
-					str = str.split(/[:\s]+/);
-					str = str[5].trim();
+					let reg = /:([^U\/L]+)/;
+					let str = reg.exec(bloco);
+					str = str[1].trim();
 					dados['alt_tgp'] = str;
 				}
 				//	AST- ASPARTATO AMINOTRANSFERASE(TGO)
-				if (bloco[0].indexOf('AST- ASPARTATO') === 0)
+				if (bloco.indexOf('AST- ASPARTATO') === 0)
 				{
-					let str = bloco[0];
-					str = str.split(/[:U]+/);
+					let reg = /:([^U\/L]+)/;
+					let str = reg.exec(bloco);
 					str = str[1].trim();
 					dados['ast_tgo'] = str;
 				}
 				//	ALBUMINA
-				if (bloco[0].indexOf('ALBUMINA') === 0)
+				if (bloco.indexOf('ALBUMINA') === 0)
 				{
-					let str = bloco[0];
-					str = str.split(/[:g]+/);
+					let reg = /:([^g\/dL]+)/;
+					let str = reg.exec(bloco);
 					str = str[1].trim();
 					dados['albumina'] = str;
 				}
 				//	CREATININA
 				if (bloco[0].indexOf('CREATININA.') === 0)
 				{
-					let str = bloco[0];
-					str = str.split(/[:(mg)]+/);
+					let reg = /:([^mg\/dL]+)/;
+					let str = reg.exec(bloco);
 					str = str[1].trim();
 					dados['creatinina'] = str;
 				}
@@ -216,9 +223,10 @@ const extraiPastaHormonios = function(subdiretorio)
 		});
 		
 		fs.writeFileSync(path.join(__dirname,'saidas',`${subdiretorio}.csv`),saida,{encoding:'utf-8'})
+		fs.writeFileSync(path.join(__dirname,'saidas',`${subdiretorio}.txt`),JSON.stringify(dados,null,2),{encoding:'utf-8'})
 	}).catch(e => console.error(e));
 }
 
 extraiPastaHormonios('hormonios');
-//extraiPastaHormonios('hemograma');
+extraiPastaHormonios('hemograma');
 // */
