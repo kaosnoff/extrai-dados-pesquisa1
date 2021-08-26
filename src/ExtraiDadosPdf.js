@@ -8,7 +8,8 @@ module.exports = class ExtraiDadosPdf
 	
 	constructor()
 	{
-		console.log('Classe instanciada', this);
+		//console.log('Classe instanciada', this);
+		console.log('PROCESSAMENTO INICIADO');
 	}
 	
 	extraiArquivo(pathArquivo)
@@ -33,7 +34,7 @@ module.exports = class ExtraiDadosPdf
 						}
 						else if (!item)
 						{
-							console.log('fim - '+filePath);
+							console.log('PROCESSADO - '+filePath);
 							let newSaida = [];
 							
 							fileSaida.forEach((dados,page) =>
