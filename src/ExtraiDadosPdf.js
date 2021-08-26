@@ -104,13 +104,11 @@ module.exports = class ExtraiDadosPdf
 					.catch(e => reject1(e));
 				})
 				promises.push(retorno);
-				//console.log(path.join(...pathDir.split('/'),fileName))
-				//console.log(fileName, ext);
 			});
 			Promise.all(promises)
 			.then(multidados =>
 			{
-				console.log(multidados);
+				resolve(multidados);
 			})
 			.catch(e => reject(e));
 		});
