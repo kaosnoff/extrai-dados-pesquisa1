@@ -5,18 +5,16 @@ const Helpers = require('./src/Helpers');
 
 const extrator = new ExtraiDadosPdf();
 
+
 let dir = fs.readdirSync(path.join('entradas','teste'));
-console.log(dir);
-/*
-let file = extrator.extraiArquivo('entradas/hormonios/ALDENORA ROCHA DOS SANTOS CAMPOS8.pdf');
-file.then(dados =>
+dir.forEach(filename =>
 {
-	//console.log(dados);
-	fs.writeFileSync(path.join(__dirname,'saidas','temp.txt'),JSON.stringify(dados,null,2),{encoding:'utf-8'});
-})
-.catch(e =>
-{
-	console.error(e);
+	let file = extrator.extraiArquivo('entradas/teste/'+filename);
+	file.then(dados =>
+	{
+		fs.writeFileSync(path.join(__dirname,'saidas',filename.replace('.pdf','.txt')),JSON.stringify(dados,null,2),{encoding: 'utf-8'});
+	})
+	.catch(e => console.error(e));
 });
 // */
 /*
