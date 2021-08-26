@@ -216,12 +216,104 @@ const extraiPastaHormonios = function(subdiretorio)
 		
 		let filenameSaida = subdiretorio.split(/(\\|\/)/g).pop();
 		
-		fs.writeFileSync(path.join(__dirname,'saidas',`${filenameSaida}.csv`),saida,{encoding:'utf-8'})
-		fs.writeFileSync(path.join(__dirname,'saidas',`${filenameSaida}.txt`),JSON.stringify(dados,null,2),{encoding:'utf-8'})
+		fs.writeFileSync(path.join(__dirname,'saidas',`${filenameSaida}.csv`),saida,{encoding:'latin1'})
+		fs.writeFileSync(path.join(__dirname,'saidas',`${filenameSaida}.json`),JSON.stringify(dados,null,2),{encoding:'utf-8'})
 	}).catch(e => console.error(e));
 }
 
+const extraiPastaDensitometria = function(subdiretorio)
+{
+	extrator.processaDiretorio(subdiretorio,
+	(paginas) =>
+	{
+		let dados = {};
+		
+		let indicesP0 = Object.keys(paginas[0]);
+		
+		for (let j in indicesP0)
+		{
+			let i = indicesP0[j];
+			let campo = paginas[0][i].join(' ');
+			
+			if (campo.indexOf('Nome:') === 0)
+			{
+				dados['nome'] = campo.replace(/Nome:/,'').trim();
+				
+				let outros = paginas[0][indicesP0[Number(j)+1]];
+				dados['id'] = outros[0];
+				dados['altura'] = outros[2].split(' ')[0];
+				dados['data_nasc'] = Helpers.str2date(outros[1]);
+			}
+			else if(campo.indexOf('Sexo:') === 0)
+			{
+				let outros = paginas[0][indicesP0[(Number(j)-1)]];
+				dados['sexo'] = outros[0];
+				dados['data_exame'] = Helpers.str2date(outros[1]);
+				dados['peso'] = outros[2].split(' ')[0];
+				//console.log(campo);
+			}
+			//let reg = /:([^ng\/dL]+)/;
+			//console.log(campo);
+		}
+		
+		paginas.forEach((pagina,p) =>
+		{
+			let indices = Object.keys(pagina);
+			indices.forEach((y,i) =>
+			{
+				let bloco = pagina[y];
+				if (bloco[0].indexOf('RESULTADOS D') === 0)
+				{
+					let local = (/(RESULTADOS D[OA])([^:]+)/g).exec(bloco[0])[2].trim();
+					
+					let linhaDados1 = pagina[indices[Number(i)+3]];
+					let linhaDados2 = pagina[indices[Number(i)+4]];
+					
+					if (linhaDados2[0].indexOf('RESULTADOS ') === 0 || linhaDados2[0].indexOf('AVALIAÇÃO') === 0) linhaDados2 = undefined;
+					
+					let regioes = {};
+					regioes[linhaDados1[0]] = linhaDados1;
+					if (linhaDados2 !== undefined) regioes[linhaDados2[0]] = linhaDados2;
+					
+					dados[local] = {};
+					
+					for (let i in regioes)
+					{
+						let regiao = regioes[i];
+						dados[local][regiao[0]] = {
+							"bmc": 									regiao[1].split(' ')[0].trim(),
+							"adulto_jovem_p": 			regiao[2].split('%')[0].trim(),
+							"adulto_jovem_tscore": 	regiao[3].split(' ')[0].trim(),
+							"comp_idade_p": 				regiao[4].split('%')[0].trim(),
+							"comp_idade_zscore": 		regiao[5].split(' ')[0].trim(),
+							"bmd": 									regiao[6].split(' ')[0].trim(),
+						}
+						if (regiao[1] === undefined)
+						{
+							console.log(regiao);
+						}
+					}
+					
+					//console.log(local, regioes);
+					
+				}
+			});
+		});
+		
+		return dados;
+	})
+	.then(dados =>
+	{
+		//console.log(dados);
+		
+		let filenameSaida = subdiretorio.split(/(\\|\/)/g).pop();
+		
+		fs.writeFileSync(path.join(__dirname,'saidas',`${filenameSaida}.json`),JSON.stringify(dados,null,2),{encoding:'utf-8'})
+	})
+	.catch(e => console.error(e));
+}
+
 // Processa as pastas necessárias
-extraiPastaHormonios('entradas/hormonios');
-extraiPastaHormonios('entradas/hemograma');
-// */
+//extraiPastaHormonios('entradas/hormonios');
+//extraiPastaHormonios('entradas/hemograma');
+extraiPastaDensitometria('entradas/teste');
