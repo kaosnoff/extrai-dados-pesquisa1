@@ -12,6 +12,7 @@ module.exports = class ExtraiDadosPdf
 		console.log('PROCESSAMENTO INICIADO');
 	}
 	
+	// Extrai um único arquivo, de forma assíncrona, retornando os dados como um Array[pagina][posY]
 	extraiArquivo(pathArquivo)
 	{
 		return new Promise((resolve, reject) =>
@@ -75,6 +76,7 @@ module.exports = class ExtraiDadosPdf
 		
 	}
 	
+	// Processa um diretório inteiro, executando para cada arquivo a função 'funcao', que toma como parâmetro um Array[pagina][posY]
 	processaDiretorio(pathDir, funcao)
 	{
 		return new Promise((resolve, reject) =>

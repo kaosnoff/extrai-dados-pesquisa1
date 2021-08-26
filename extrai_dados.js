@@ -4,22 +4,13 @@ const fs = require('fs');
 const Helpers = require('./src/Helpers');
 
 const extrator = new ExtraiDadosPdf();
-/*
-let dir = fs.readdirSync(path.join('entradas','teste'));
-dir.forEach(filename =>
-{
-	let file = extrator.extraiArquivo('entradas/teste/'+filename);
-	file.then(dados =>
-	{
-		fs.writeFileSync(path.join(__dirname,'saidas',filename.replace('.pdf','.txt')),JSON.stringify(dados,null,2),{encoding: 'utf-8'});
-	})
-	.catch(e => console.error(e));
-});
-// */
 
+// Função que irá extrair os dados de hormônios e hemograma a partir de uma pasta de entrada
 const extraiPastaHormonios = function(subdiretorio)
 {
-	extrator.processaDiretorio(`entradas/${subdiretorio}`,(paginas) =>
+	extrator.processaDiretorio(`${subdiretorio}`,
+	// Monta a lógica para filtrar somente os dados necessários
+	(paginas) =>
 	{
 		let dados = {};
 		
@@ -191,6 +182,7 @@ const extraiPastaHormonios = function(subdiretorio)
 		// CABEÇALHO
 		saida += `Data/Hora Cadastro;Nome;DN;TSH (HORMÔNIO ESTIMULANTE DA TIREOIDE);T3 (TRIIODOTIRONINA);T3L (TRIIODOTIRONINA LIVRE);T4 (TIROXINA);T4L (TIROXINA LIVRE);CÁLCIO SÉRICO;VITAMINA D (25 HIDROXI-VIT D);CÁLCIO IONIZADO;FÓSFORO;PARATORMÔNIO MOLÉCULA INTACTA (PTH);FOSFATASE ALCALINA;ALT - ALANINA AMINOTRANSFERASE (TGP);AST- ASPARTATO AMINOTRANSFERASE(TGO);ALBUMINA;CREATININA;\n`;
 		
+		// Linha a linha
 		dados.forEach((entrada,i) =>
 		{
 			let dtCadastro = new Date(entrada['data_cadastro']);
@@ -222,11 +214,14 @@ const extraiPastaHormonios = function(subdiretorio)
 			saida += "\n";
 		});
 		
-		fs.writeFileSync(path.join(__dirname,'saidas',`${subdiretorio}.csv`),saida,{encoding:'utf-8'})
-		fs.writeFileSync(path.join(__dirname,'saidas',`${subdiretorio}.txt`),JSON.stringify(dados,null,2),{encoding:'utf-8'})
+		let filenameSaida = subdiretorio.split(/(\\|\/)/g).pop();
+		
+		fs.writeFileSync(path.join(__dirname,'saidas',`${filenameSaida}.csv`),saida,{encoding:'utf-8'})
+		fs.writeFileSync(path.join(__dirname,'saidas',`${filenameSaida}.txt`),JSON.stringify(dados,null,2),{encoding:'utf-8'})
 	}).catch(e => console.error(e));
 }
 
-extraiPastaHormonios('hormonios');
-extraiPastaHormonios('hemograma');
+// Processa as pastas necessárias
+extraiPastaHormonios('entradas/hormonios');
+extraiPastaHormonios('entradas/hemograma');
 // */
