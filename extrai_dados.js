@@ -17,7 +17,7 @@ const extraiPastaHormonios = function(subdiretorio)
 		for (let i in paginas[0])
 		{
 			let campo = paginas[0][i];
-			if (campo[0].indexOf('Paciente') === 0)
+			if (campo[0].indexOf('Paciente.') === 0)
 			{
 				dados['nome'] = campo[1].trim();
 			}
@@ -26,7 +26,7 @@ const extraiPastaHormonios = function(subdiretorio)
 				dados['data_nasc'] = campo[1].trim();
 				dados['data_nasc'] = Helpers.str2date(dados['data_nasc']);
 			}
-			else if (campo[0].indexOf('Sexo') === 0)
+			else if (campo[0].indexOf('Sexo.') === 0)
 			{
 				dados['sexo'] = campo[1].trim();
 			}
@@ -34,7 +34,7 @@ const extraiPastaHormonios = function(subdiretorio)
 			{
 				dados['cpf'] = campo[1].trim();
 			}
-			else if (campo[0].indexOf('Data/Hora Cadastro') === 0)
+			else if (campo[0].indexOf('Data/Hora Cadastro.') === 0)
 			{
 				dados['data_cadastro'] = campo[1].trim();
 				dados['data_cadastro'] = dados['data_cadastro'].replace(' - ',' ');
@@ -58,6 +58,67 @@ const extraiPastaHormonios = function(subdiretorio)
 				reg: /:([^μUI]+)/,
 				query: "T3L ",
 			},
+			//	T4 (TIROXINA)
+			'T4': {
+				reg: /:([^ng\/dL]+)/,
+				query: "T4 ",
+			},
+			//	T4L (TIROXINA LIVRE)
+			'T4L': {
+				reg: /:([^ng\/dL]+)/,
+				query: "T4L ",
+			},
+			//	CÁLCIO SÉRICO
+			'calcio_serico': {
+				reg: /:([^mg\/dL]+)/,
+				query: "CÁLCIO SÉRICO.",
+			},
+			//	VITAMINA D (25 HIDROXI-VIT D)
+			'vitamina_d': {
+				reg: /:([^ng\/mL]+)/,
+				query: "VITAMINA D ",
+			},
+			//	CÁLCIO IONIZADO
+			'calcio_ionizado': {
+				reg: /:([^mmol\/L]+)/,
+				query: "CÁLCIO IONIZADO.",
+			},
+			//	FÓSFORO
+			'fosforo': {
+				reg: /:([^mg\/dL]+)/,
+				query: "FÓSFORO",
+			},
+			//	PARATORMÔNIO MOLÉCULA INTACTA (PTH)
+			'fosforo': {
+				reg: /:([^mg\/dL]+)/,
+				query: "FÓSFORO",
+			},
+			//	FOSFATASE ALCALINA
+			'fosfatase': {
+				reg: /:([^U\/L]+)/,
+				query: "FOSFATASE ALCALINA",
+				exception: "FOSFATASE ALCALINA FRAÇÃO ÓSSEA",
+			},
+			//	ALT - ALANINA AMINOTRANSFERASE (TGP)
+			'alt_tgp': {
+				reg: /:([^U\/L]+)/,
+				query: "ALT - ALANINA",
+			},
+			//	AST- ASPARTATO AMINOTRANSFERASE(TGO)
+			'ast_tgo': {
+				reg: /:([^U\/L]+)/,
+				query: "AST- ASPARTATO",
+			},
+			//	ALBUMINA
+			'albumina': {
+				reg: /:([^g\/dL]+)/,
+				query: "ALBUMINA",
+			},
+			//	CREATININA
+			'creatinina': {
+				reg: /:([^mg\/dL]+)/,
+				query: "CREATININA.",
+			},
 		}
 		
 		paginas.forEach((pagina,i) =>
@@ -71,6 +132,10 @@ const extraiPastaHormonios = function(subdiretorio)
 					let filtro = filtros[index];
 					if (bloco.indexOf(filtro.query) === 0)
 					{
+						if (filtro.exception !== undefined)
+						{
+							if (bloco.indexOf(filtro.exception) === 0) continue;
+						}
 						let str = filtro.reg.exec(bloco);
 						//console.log(dados.nome,str);
 						if (str === null || str == undefined || str[1] === undefined)
@@ -81,129 +146,6 @@ const extraiPastaHormonios = function(subdiretorio)
 						str = str[1].trim();
 						dados[index] = str;
 					}
-				}
-				/*
-				//	TSH (HORMÔNIO ESTIMULANTE DA TIREOIDE)
-				if (bloco.indexOf('TSH') === 0)
-				{
-					let reg = /:([^μUI]+)/;
-					let str = reg.exec(bloco);
-					str = str[1].trim();
-					dados['TSH'] = str;
-				}
-				//	T3 (TRIIODOTIRONINA)
-				if (bloco.indexOf('T3 ') === 0)
-				{
-					let reg = /:([^ng\/]+)/;
-					let str = reg.exec(bloco);
-					str = str[1].trim();
-					dados['T3'] = str;
-				}
-				//	T3L (TRIIODOTIRONINA LIVRE)
-				if (bloco.indexOf('T3L ') === 0)
-				{
-					let reg = /:([^pg\/]+)/;
-					let str = reg.exec(bloco);
-					str = str[1].trim();
-					dados['T3L'] = str;
-				}
-				// */
-				//	T4 (TIROXINA)
-				if (bloco.indexOf('T4 ') === 0)
-				{
-					let reg = /:([^ng\/dL]+)/;
-					let str = reg.exec(bloco);
-					str = str[1].trim();
-					dados['T4'] = str;
-				}
-				//	T4L (TIROXINA LIVRE)
-				if (bloco.indexOf('T4L ') === 0)
-				{
-					let reg = /:([^ng\/dL]+)/;
-					let str = reg.exec(bloco);
-					str = str[1].trim();
-					dados['T4L'] = str;
-				}
-				//	CÁLCIO SÉRICO
-				if (bloco.indexOf('CÁLCIO SÉRICO.') === 0)
-				{
-					let reg = /:([^mg\/dL]+)/;
-					let str = reg.exec(bloco);
-					str = str[1].trim();
-					dados['calcio_serico'] = str;
-				}
-				//	VITAMINA D (25 HIDROXI-VIT D)
-				if (bloco.indexOf('VITAMINA D ') === 0)
-				{
-					let reg = /:([^ng\/mL]+)/;
-					let str = reg.exec(bloco);
-					str = str[1].trim();
-					dados['vitamina_d'] = str;
-				}
-				//	CÁLCIO IONIZADO
-				if (bloco.indexOf('CÁLCIO IONIZADO.') === 0)
-				{
-					let reg = /:([^mmol\/L]+)/;
-					let str = reg.exec(bloco);
-					str = str[1].trim();
-					dados['calcio_ionizado'] = str;
-				}
-				//	FÓSFORO
-				if (bloco.indexOf('FÓSFORO') === 0)
-				{
-					let reg = /:([^mg\/dL]+)/;
-					let str = reg.exec(bloco);
-					str = str[1].trim();
-					dados['fosforo'] = str;
-				}
-				//	PARATORMÔNIO MOLÉCULA INTACTA (PTH)
-				if (bloco.indexOf('PARATORMÔNIO MOLÉCULA INTACTA') === 0)
-				{
-					let reg = /:([^pg\/mL]+)/;
-					let str = reg.exec(bloco);
-					str = str[1].trim();
-					dados['paratormonio'] = str;
-				}
-				//	FOSFATASE ALCALINA
-				if (bloco.indexOf('FOSFATASE ALCALINA') === 0)
-				{
-					if (bloco.indexOf('FOSFATASE ALCALINA FRAÇÃO ÓSSEA') === 0) return;
-					let reg = /:([^U\/L]+)/;
-					let str = reg.exec(bloco);
-					str = str[1].trim();
-					dados['fosfatase'] = str;
-				}
-				//	ALT - ALANINA AMINOTRANSFERASE (TGP)
-				if (bloco.indexOf('ALT - ALANINA') === 0)
-				{
-					let reg = /:([^U\/L]+)/;
-					let str = reg.exec(bloco);
-					str = str[1].trim();
-					dados['alt_tgp'] = str;
-				}
-				//	AST- ASPARTATO AMINOTRANSFERASE(TGO)
-				if (bloco.indexOf('AST- ASPARTATO') === 0)
-				{
-					let reg = /:([^U\/L]+)/;
-					let str = reg.exec(bloco);
-					str = str[1].trim();
-					dados['ast_tgo'] = str;
-				}
-				//	ALBUMINA
-				if (bloco.indexOf('ALBUMINA') === 0)
-				{
-					let reg = /:([^g\/dL]+)/;
-					let str = reg.exec(bloco);
-					str = str[1].trim();
-					dados['albumina'] = str;
-				}
-				//	CREATININA
-				if (bloco[0].indexOf('CREATININA.') === 0)
-				{
-					let reg = /:([^mg\/dL]+)/;
-					let str = reg.exec(bloco);
-					str = str[1].trim();
-					dados['creatinina'] = str;
 				}
 			}
 
@@ -392,6 +334,6 @@ const extraiPastaDensitometria = function(subdiretorio)
 }
 
 // Processa as pastas necessárias
-//extraiPastaHormonios('entradas/teste');
-extraiPastaHormonios('entradas/hormonios');
-extraiPastaDensitometria('entradas/densitometria');
+extraiPastaHormonios('entradas/teste');
+//extraiPastaHormonios('entradas/hormonios');
+//extraiPastaDensitometria('entradas/densitometria');
