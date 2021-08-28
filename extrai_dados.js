@@ -248,7 +248,11 @@ const extraiPastaDensitometria = function(subdiretorio)
 					let linhaDados1 = pagina[indices[Number(i)+3]];
 					let linhaDados2 = pagina[indices[Number(i)+4]];
 					
-					if (linhaDados2[0].indexOf('RESULTADOS ') === 0 || linhaDados2[0].indexOf('AVALIAÇÃO') === 0) linhaDados2 = undefined;
+					if (linhaDados1[0].indexOf('RESULTADOS') === 0 || linhaDados1[0].indexOf('AVALIAÇÃO') === 0)
+					{
+						return;
+					} 
+					if (linhaDados2[0].indexOf('RESULTADOS') === 0 || linhaDados2[0].indexOf('AVALIAÇÃO') === 0) linhaDados2 = undefined;
 					
 					let regioes = {};
 					regioes[linhaDados1[0]] = linhaDados1;
@@ -261,6 +265,13 @@ const extraiPastaDensitometria = function(subdiretorio)
 					for (let i in regioes)
 					{
 						let regiao = regioes[i];
+						if (regiao.length < 6)
+						{
+							console.log(dados.id,dados.nome,regiao, linhaDados1, linhaDados2);
+							console.log(bloco);
+							//throw new Error('Fechou');
+							return;
+						}
 						dados['OSSOS'][local][regiao[0]] = {
 							"bmc": 									regiao[1].split(' ')[0].trim(),
 							"adulto_jovem_p": 			regiao[2].split('%')[0].trim(),
@@ -327,6 +338,9 @@ const extraiPastaDensitometria = function(subdiretorio)
 		
 		let filenameSaida = subdiretorio.split(/(\\|\/)/g).pop();
 		
+		console.log("Tamanho da saída:", saida.length);
+		console.log('Arquivo de saída: ',path.join(__dirname,'saidas',`${filenameSaida}.csv`))
+		
 		fs.writeFileSync(path.join(__dirname,'saidas',`${filenameSaida}.csv`),saida,{encoding:'latin1'})
 		fs.writeFileSync(path.join(__dirname,'saidas',`${filenameSaida}.json`),JSON.stringify(dados,null,2),{encoding:'utf-8'})
 	})
@@ -334,6 +348,6 @@ const extraiPastaDensitometria = function(subdiretorio)
 }
 
 // Processa as pastas necessárias
-extraiPastaHormonios('entradas/teste');
+//extraiPastaHormonios('entradas/teste');
 //extraiPastaHormonios('entradas/hormonios');
-//extraiPastaDensitometria('entradas/densitometria');
+extraiPastaDensitometria('entradas/densitometria');

@@ -35,7 +35,7 @@ module.exports = class ExtraiDadosPdf
 						}
 						else if (!item)
 						{
-							console.log('PROCESSADO - '+filePath);
+							//console.log('PROCESSADO - '+filePath);
 							let newSaida = [];
 							
 							fileSaida.forEach((dados,page) =>
