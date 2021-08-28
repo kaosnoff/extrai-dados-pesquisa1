@@ -42,11 +42,47 @@ const extraiPastaHormonios = function(subdiretorio)
 			}
 		}
 		
+		const filtros = {
+			//	TSH (HORMÔNIO ESTIMULANTE DA TIREOIDE)
+			'TSH': {
+				reg: /:([^μUI]+)/,
+				query: "TSH",
+			},
+			//	T3 (TRIIODOTIRONINA)
+			'T3': {
+				reg: /:([^ng\/]+)/,
+				query: "T3 ",
+			},
+			//	T3L (TRIIODOTIRONINA LIVRE)
+			'T3L': {
+				reg: /:([^μUI]+)/,
+				query: "T3L ",
+			},
+		}
+		
 		paginas.forEach((pagina,i) =>
 		{
 			for (let j in pagina)
 			{
 				let bloco = pagina[j].join('');
+				
+				for (let index in filtros)
+				{
+					let filtro = filtros[index];
+					if (bloco.indexOf(filtro.query) === 0)
+					{
+						let str = filtro.reg.exec(bloco);
+						//console.log(dados.nome,str);
+						if (str === null || str == undefined || str[1] === undefined)
+						{
+							console.error("Erro no processamento",dados.nome, bloco, str);
+							break;
+						}
+						str = str[1].trim();
+						dados[index] = str;
+					}
+				}
+				/*
 				//	TSH (HORMÔNIO ESTIMULANTE DA TIREOIDE)
 				if (bloco.indexOf('TSH') === 0)
 				{
@@ -71,6 +107,7 @@ const extraiPastaHormonios = function(subdiretorio)
 					str = str[1].trim();
 					dados['T3L'] = str;
 				}
+				// */
 				//	T4 (TIROXINA)
 				if (bloco.indexOf('T4 ') === 0)
 				{
@@ -275,12 +312,14 @@ const extraiPastaDensitometria = function(subdiretorio)
 					regioes[linhaDados1[0]] = linhaDados1;
 					if (linhaDados2 !== undefined) regioes[linhaDados2[0]] = linhaDados2;
 					
-					dados[local] = {};
+					if (dados['OSSOS'] === undefined) dados['OSSOS'] = {};
+					
+					dados['OSSOS'][local] = {};
 					
 					for (let i in regioes)
 					{
 						let regiao = regioes[i];
-						dados[local][regiao[0]] = {
+						dados['OSSOS'][local][regiao[0]] = {
 							"bmc": 									regiao[1].split(' ')[0].trim(),
 							"adulto_jovem_p": 			regiao[2].split('%')[0].trim(),
 							"adulto_jovem_tscore": 	regiao[3].split(' ')[0].trim(),
@@ -305,15 +344,54 @@ const extraiPastaDensitometria = function(subdiretorio)
 	.then(dados =>
 	{
 		//console.log(dados);
+		let saida = "";
+		
+		// CABEÇALHO
+		saida += `Data do Exame;ID;Nome;Data de Nascimento;Altura;Peso;`;
+		for (let i = 0; i < 5; i++)
+		{
+			saida += `Osso;Região;BMC;Adulto Jovem;Adulto Jovem T-score;Comp. Idade;Comp. Idade Z-score;BMD;`;
+		}
+		saida += "\n";
+		
+		for (let i in dados)
+		{
+			let linha = dados[i];
+			saida += (linha['data_exame']).toLocaleDateString()+";";
+			saida += linha['id']+";";
+			saida += linha['nome']+";";
+			saida += (linha['data_nasc']).toLocaleDateString()+";";
+			saida += linha['altura']+";";
+			saida += linha['peso']+";";
+			
+			for (let osso in linha['OSSOS'])
+			{
+				let detalhes = linha['OSSOS'][osso];
+				for (let regiao in detalhes)
+				{
+					saida += osso+";";
+					saida += regiao+";";
+					saida += detalhes[regiao]['bmc']+";";
+					saida += detalhes[regiao]['adulto_jovem_p']+";";
+					saida += detalhes[regiao]['adulto_jovem_tscore']+";";
+					saida += detalhes[regiao]['comp_idade_p']+";";
+					saida += detalhes[regiao]['comp_idade_zscore']+";";
+					saida += detalhes[regiao]['bmd']+";";
+				}
+			}
+			
+			saida += "\n";
+		}
 		
 		let filenameSaida = subdiretorio.split(/(\\|\/)/g).pop();
 		
+		fs.writeFileSync(path.join(__dirname,'saidas',`${filenameSaida}.csv`),saida,{encoding:'latin1'})
 		fs.writeFileSync(path.join(__dirname,'saidas',`${filenameSaida}.json`),JSON.stringify(dados,null,2),{encoding:'utf-8'})
 	})
 	.catch(e => console.error(e));
 }
 
 // Processa as pastas necessárias
-//extraiPastaHormonios('entradas/hormonios');
-//extraiPastaHormonios('entradas/hemograma');
-extraiPastaDensitometria('entradas/teste');
+//extraiPastaHormonios('entradas/teste');
+extraiPastaHormonios('entradas/hormonios');
+extraiPastaDensitometria('entradas/densitometria');
