@@ -8,6 +8,7 @@ const extrator = new ExtraiDadosPdf();
 // Função que irá extrair os dados de hormônios e hemograma a partir de uma pasta de entrada
 const extraiPastaHormonios = function(subdiretorio)
 {
+	console.log("Extraindo pasta '"+subdiretorio+"'");
 	extrator.processaDiretorio(`${subdiretorio}`,
 	// Monta a lógica para filtrar somente os dados necessários
 	(paginas) =>
@@ -159,6 +160,7 @@ const extraiPastaHormonios = function(subdiretorio)
 		return dados;
 	}).then(dados =>
 	{
+		console.log('Salvando arquivos...');
 		//console.log(dados);
 		let locale = 'pt-BR';
 		let saida = "";
