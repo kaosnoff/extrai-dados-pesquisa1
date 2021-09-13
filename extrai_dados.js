@@ -55,12 +55,12 @@ const extraiPastaHormonios = function(subdiretorio)
 			},
 			//	T3L (TRIIODOTIRONINA LIVRE)
 			'T3L': {
-				reg: /:([^μUI]+)/,
+				reg: /:([^pg\/mL]+)/,
 				query: "T3L ",
 			},
 			//	T4 (TIROXINA)
 			'T4': {
-				reg: /:([^ng\/dL]+)/,
+				reg: /:([^μg\/dL]+)/,
 				query: "T4 ",
 			},
 			//	T4L (TIROXINA LIVRE)
@@ -137,12 +137,17 @@ const extraiPastaHormonios = function(subdiretorio)
 							if (bloco.indexOf(filtro.exception) === 0) continue;
 						}
 						let str = filtro.reg.exec(bloco);
-						//console.log(dados.nome,str);
 						if (str === null || str == undefined || str[1] === undefined)
 						{
 							console.error("Erro no processamento",dados.nome, bloco, str);
 							break;
 						}
+						/*
+						if(index == 'T4')
+						{
+							console.log(dados.nome,str);
+						}
+						// */
 						str = str[1].trim();
 						dados[index] = str;
 					}
@@ -349,5 +354,5 @@ const extraiPastaDensitometria = function(subdiretorio)
 
 // Processa as pastas necessárias
 //extraiPastaHormonios('entradas/teste');
-//extraiPastaHormonios('entradas/hormonios');
-extraiPastaDensitometria('entradas/densitometria');
+extraiPastaHormonios('entradas/hormonios');
+//extraiPastaDensitometria('entradas/densitometria');
