@@ -90,9 +90,9 @@ const extraiPastaHormonios = function(subdiretorio)
 				query: "FÓSFORO",
 			},
 			//	PARATORMÔNIO MOLÉCULA INTACTA (PTH)
-			'fosforo': {
-				reg: /:([^mg\/dL]+)/,
-				query: "FÓSFORO",
+			'pht': {
+				reg: /:([^pg\/mL]+)/,
+				query: "PARATORMÔNIO MOLÉCULA INTACTA ",
 			},
 			//	FOSFATASE ALCALINA
 			'fosfatase': {
@@ -186,7 +186,7 @@ const extraiPastaHormonios = function(subdiretorio)
 				'vitamina_d',
 				'calcio_ionizado',
 				'fosforo',
-				'paratormonio',
+				'pht',
 				'fosfatase',
 				'alt_tgp',
 				'ast_tgo',
