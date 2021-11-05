@@ -1,0 +1,14 @@
+{
+  "name": "cmd-file-handler",
+  "version": "0.0.1",
+  "description": "Manipulador de arquivos pelo CMD",
+  "main": "index.js",
+  "author": "Vitor Dutra <kaosnoff@gmail.com>",
+  "license": "MIT",
+	"scripts": {
+		"test": "node index.js compara -o \"E:\\dev\\stj\\AUD\\Auditar\" -d \"D:\\dev\\stj\\Auditar\" -r"
+	},
+  "dependencies": {
+    "yargs": "^17.2.1"
+  }
+}
