@@ -5,10 +5,11 @@
   "main": "index.js",
   "author": "Vitor Dutra <kaosnoff@gmail.com>",
   "license": "MIT",
-	"scripts": {
-		"test": "node index.js compara -o \"E:\\dev\\stj\\AUD\\Auditar\" -d \"D:\\dev\\stj\\Auditar\" -r"
-	},
+  "scripts": {
+    "test": "node index.js compara -o \"E:\\dev\\stj\\AUD\\Auditar\" -d \"D:\\dev\\stj\\Auditar\" -r"
+  },
   "dependencies": {
+    "md5-file": "^5.0.0",
     "yargs": "^17.2.1"
   }
 }
