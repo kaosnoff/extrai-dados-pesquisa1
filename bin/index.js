@@ -137,6 +137,7 @@ if (argv._.includes('compara'))
 	{
 		if (md5Dest[hash] !== undefined)
 		{
+			md5Orig[hash].path2 = md5Dest[hash].path;
 			saida.iguais.push(md5Orig[hash]);
 		}
 		else
