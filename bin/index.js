@@ -152,34 +152,13 @@ function getFilesMd5(myPath,recursivo)
 	return md5Arr;
 }
 
-if (argv._.includes('compara'))
+function comparaHashes(md5Orig,md5Dest)
 {
-	const pathOrig = path.join(...(argv.origem).split(/[\/,\\]/));
-	const pathDest = path.join(...(argv.destino).split(/[\/,\\]/));
-	let fLog = argv.saida;
-	const recursivo = !!argv.recursivo;
-	
-	if (pathOrig == '' || pathOrig == undefined)
-	{
-		return console.error("Não foi especificada uma origem!");
-	}
-	if (pathDest == '' || pathDest == undefined)
-	{
-		return console.error("Não foi especificado um destino!");
-	}
-	if (fLog == '' || fLog == undefined)
-	{
-		fLog = path.join(__dirname,'compara.log');
-	}
-	
 	let saida = {
 		iguais: [],
 		difOrig: [],
 		difDest: []
 	};
-	
-	let md5Orig = getFilesMd5(pathOrig, recursivo);
-	let md5Dest = getFilesMd5(pathDest, recursivo);
 	
 	const keysOrig = Object.keys(md5Orig);
 	const keysDest = Object.keys(md5Dest);
@@ -203,6 +182,34 @@ if (argv._.includes('compara'))
 			saida.difDest.push(md5Dest[hash]);
 		}
 	}
+	
+	return saida;
+}
+
+if (argv._.includes('compara'))
+{
+	const pathOrig = path.join(...(argv.origem).split(/[\/,\\]/));
+	const pathDest = path.join(...(argv.destino).split(/[\/,\\]/));
+	let fLog = argv.saida;
+	const recursivo = !!argv.recursivo;
+	
+	if (pathOrig == '' || pathOrig == undefined)
+	{
+		return console.error("Não foi especificada uma origem!");
+	}
+	if (pathDest == '' || pathDest == undefined)
+	{
+		return console.error("Não foi especificado um destino!");
+	}
+	if (fLog == '' || fLog == undefined)
+	{
+		fLog = path.join(__dirname,'compara.log');
+	}
+	
+	let md5Orig = getFilesMd5(pathOrig, recursivo);
+	let md5Dest = getFilesMd5(pathDest, recursivo);
+	
+	let saida = comparaHashes(md5Orig, md5Dest);
 	
 	fs.writeFileSync(fLog, JSON.stringify(saida,null,2),{encoding: 'utf8'});
 	
@@ -230,4 +237,33 @@ if (argv._.includes('lista'))
 	fs.writeFileSync(fLog, JSON.stringify(fileList,null,2),{encoding: 'utf8'});
 	
 	console.log(`Encontrados: ${Object.keys(fileList).length} objeto(s) e a lista foi salva em "${fLog}".`);
+}
+
+if (argv._.includes('compara-lista'))
+{
+	let fLog = argv.saida;
+	
+	if (argv.origem == '' || argv.origem == undefined)
+	{
+		return console.error("Não foi especificada um arquivo de origem!");
+	}
+	if (argv.destino == '' || argv.destino == undefined)
+	{
+		return console.error("Não foi especificado um arquivo de destino!");
+	}
+	if (fLog == '' || fLog == undefined)
+	{
+		fLog = path.join(__dirname,'compara.log');
+	}
+	const fileOrig = path.join(...(argv.origem).split(/[\/,\\]/));
+	const fileDest = path.join(...(argv.destino).split(/[\/,\\]/));
+	
+	let md5Orig = JSON.parse(fs.readFileSync(fileOrig,{encoding: 'utf8'}));
+	let md5Dest = JSON.parse(fs.readFileSync(fileDest,{encoding: 'utf8'}));
+	
+	let saida = comparaHashes(md5Orig, md5Dest);
+	
+	fs.writeFileSync(fLog, JSON.stringify(saida,null,2),{encoding: 'utf8'});
+	
+	console.log(`Comparados: ${Object.keys(md5Orig).length} objeto(s) com ${Object.keys(md5Dest).length} objeto(s).`);
 }
