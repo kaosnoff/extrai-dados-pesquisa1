@@ -6,6 +6,10 @@
   "author": "Vitor Dutra <kaosnoff@gmail.com>",
   "license": "MIT",
   "scripts": {
+		"file": "node index.js",
+		"compara": "node index.js compara",
+		"lista": "node index.js lista",
+    "test2": "node index.js lista -o \"C:\\dev\"",
     "test": "node index.js compara -o \"E:\\dev\\stj\\AUD\\Auditar\" -d \"D:\\dev\\stj\\Auditar\" -r"
   },
   "dependencies": {

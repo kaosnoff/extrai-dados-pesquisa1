@@ -2,9 +2,10 @@ const yargs = require('yargs');
 const fs = require('fs');
 const path = require('path');
 const md5File = require('md5-file');
+const { exit } = require('process');
 
 const argv = yargs
-	.command('compara', 'Caminho da pasta de origem para comparar',
+	.command('compara', 'Compara os arquivos de duas pastas',
 		{
 			origem: {
 				description: 'Caminho da pasta de origem a ser comparada',
@@ -18,7 +19,7 @@ const argv = yargs
 			},
 			saida: {
 				description: 'Arquivo de saída para o log.',
-				alias: 'out',
+				alias: 'l',
 				type: 'string'
 			},
 			recursivo: {
@@ -26,6 +27,44 @@ const argv = yargs
 				alias: 'r',
 				type: 'boolean'
 			}
+		}
+	)
+	.command('lista',"Grava uma lista de todos os arquivos da pasta informada, ordenado pelo hash",
+		{
+			origem: {
+				description: 'Caminho da pasta de origem a ser comparada',
+				alias: 'o',
+				type: 'string'
+			},
+			saida: {
+				description: 'Arquivo de saída para o log.',
+				alias: 'l',
+				type: 'string'
+			},
+			recursivo: {
+				description: 'Comparação recursiva',
+				alias: 'r',
+				type: 'boolean'
+			}
+		}
+	)
+	.command('compara-lista',"Compara duas listas de arquivos pelos seus hashs.",
+		{
+			origem: {
+				description: 'Caminho do arquivo de lista de origem a ser comparado',
+				alias: 'o',
+				type: 'string'
+			},
+			destino: {
+				description: 'Caminho do arquivo de lista final a ser comparado',
+				alias: 'd',
+				type: 'string'
+			},
+			saida: {
+				description: 'Arquivo de saída para o log.',
+				alias: 'l',
+				type: 'string'
+			},
 		}
 	)
 	/*
@@ -62,16 +101,24 @@ function getFilesFromPath(myPath, recursivo)
 			isDir: stat.isDirectory(),
 			size: stat.size
 		}
-		//console.log(stat);
+		
 		
 		let subdir = undefined;
+		
 		if (item.isDir)
 		{
 			subdir = getFilesFromPath(fPath,recursivo);
 		}
 		else
 		{
-			item.hash = md5File.sync(fPath);
+			try{
+				item.hash = md5File.sync(fPath);
+			}
+			catch(e)
+			{
+				//console.log(e);
+				console.error(`Erro ao calcular o hash do arquivo '${fPath}'.`);
+			}
 		}
 		
 		saida[fPath] = item;
@@ -97,6 +144,14 @@ function sortFilesMd5(files)
 	return saida;
 }
 
+function getFilesMd5(myPath,recursivo)
+{
+	let files = getFilesFromPath(myPath, recursivo);
+	let md5Arr = sortFilesMd5(files);
+	
+	return md5Arr;
+}
+
 if (argv._.includes('compara'))
 {
 	const pathOrig = path.join(...(argv.origem).split(/[\/,\\]/));
@@ -117,18 +172,14 @@ if (argv._.includes('compara'))
 		fLog = path.join(__dirname,'compara.log');
 	}
 	
-	let filesOrig = getFilesFromPath(pathOrig, recursivo);
-	let filesDest = getFilesFromPath(pathDest, recursivo);
-	console.log(Object.keys(filesOrig).length, Object.keys(filesDest).length);
-	
 	let saida = {
 		iguais: [],
 		difOrig: [],
 		difDest: []
 	};
 	
-	let md5Orig = sortFilesMd5(filesOrig);
-	let md5Dest = sortFilesMd5(filesDest);
+	let md5Orig = getFilesMd5(pathOrig, recursivo);
+	let md5Dest = getFilesMd5(pathDest, recursivo);
 	
 	const keysOrig = Object.keys(md5Orig);
 	const keysDest = Object.keys(md5Dest);
@@ -157,4 +208,26 @@ if (argv._.includes('compara'))
 	
 	console.log(`Comparados: ${Object.keys(md5Orig).length} objeto(s) com ${Object.keys(md5Dest).length} objeto(s).`);
 	//console.log(md5Dest);
+}
+
+if (argv._.includes('lista'))
+{
+	const pathOrig = path.join(...((argv.origem).split(/[\/,\\]/)));
+	let fLog = argv.saida;
+	const recursivo = !!argv.recursivo;
+	
+	if (pathOrig == '' || pathOrig == undefined)
+	{
+		return console.error("Não foi especificada uma origem!");
+	}
+	if (fLog == '' || fLog == undefined)
+	{
+		fLog = path.join(__dirname,'lista_arquivos.log');
+	}
+	
+	let fileList = getFilesMd5(pathOrig, recursivo);
+	
+	fs.writeFileSync(fLog, JSON.stringify(fileList,null,2),{encoding: 'utf8'});
+	
+	console.log(`Encontrados: ${Object.keys(fileList).length} objeto(s) e a lista foi salva em "${fLog}".`);
 }
